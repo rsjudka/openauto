@@ -43,6 +43,7 @@ public:
     bool init() override;
     void write(uint64_t timestamp, const aasdk::common::DataConstBuffer& buffer) override;
     void stop() override;
+    void resize();
 
 signals:
     void startPlayback();

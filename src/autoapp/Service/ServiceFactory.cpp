@@ -55,9 +55,6 @@ ServiceFactory::ServiceFactory(boost::asio::io_service& ioService, configuration
     , activeArea_(activeArea)
     , screenGeometry_(this->mapActiveAreaToGlobal(activeArea_))
     , activeCallback_(activeCallback)
-#ifdef USE_OMX
-    , omxVideoOutput_(std::make_shared<projection::OMXVideoOutput>(configuration_, this->QRectToDestRect(screenGeometry_), activeCallback_))
-#endif
 {
 
 }
@@ -80,10 +77,15 @@ ServiceList ServiceFactory::create(aasdk::messenger::IMessenger::Pointer messeng
 IService::Pointer ServiceFactory::createVideoService(aasdk::messenger::IMessenger::Pointer messenger)
 {
 #ifdef USE_OMX
+    omxVideoOutput_ = std::make_shared<projection::OMXVideoOutput>(configuration_, this->QRectToDestRect(screenGeometry_), activeCallback_);
     auto videoOutput(omxVideoOutput_);
 #else
-    auto qtVideoOutput = new projection::QtVideoOutput(configuration_, activeArea_);
-    projection::IVideoOutput::Pointer videoOutput(qtVideoOutput, std::bind(&QObject::deleteLater, std::placeholders::_1));
+    qtVideoOutput_ = new projection::QtVideoOutput(configuration_, activeArea_);
+    if (activeCallback_ != nullptr) {
+        QObject::connect(qtVideoOutput_, &projection::QtVideoOutput::startPlayback, [callback = activeCallback_]() { callback(true); });
+        QObject::connect(qtVideoOutput_, &projection::QtVideoOutput::stopPlayback, [callback = activeCallback_]() { callback(false); });
+    }
+    projection::IVideoOutput::Pointer videoOutput(qtVideoOutput_, std::bind(&QObject::deleteLater, std::placeholders::_1));
 #endif
     return std::make_shared<VideoService>(ioService_, messenger, std::move(videoOutput));
 }
@@ -128,9 +130,9 @@ IService::Pointer ServiceFactory::createInputService(aasdk::messenger::IMessenge
     }
 
     QObject* inputObject = activeArea_ == nullptr ? qobject_cast<QObject*>(QApplication::instance()) : qobject_cast<QObject*>(activeArea_);
-    projection::IInputDevice::Pointer inputDevice(std::make_shared<projection::InputDevice>(*inputObject, configuration_, std::move(screenGeometry_), std::move(videoGeometry)));
+    inputDevice_ = std::make_shared<projection::InputDevice>(*inputObject, configuration_, std::move(screenGeometry_), std::move(videoGeometry));
 
-    return std::make_shared<InputService>(ioService_, messenger, std::move(inputDevice));
+    return std::make_shared<InputService>(ioService_, messenger, std::move(projection::IInputDevice::Pointer(inputDevice_)));
 }
 
 void ServiceFactory::createAudioServices(ServiceList& serviceList, aasdk::messenger::IMessenger::Pointer messenger)
@@ -163,7 +165,18 @@ void ServiceFactory::createAudioServices(ServiceList& serviceList, aasdk::messen
 void ServiceFactory::setOpacity(unsigned int alpha)
 {
 #ifdef USE_OMX
-    omxVideoOutput_->setOpacity(alpha);
+    if (omxVideoOutput_ != nullptr) omxVideoOutput_->setOpacity(alpha);
+#endif
+}
+
+void ServiceFactory::resize()
+{
+    screenGeometry_ = this->mapActiveAreaToGlobal(activeArea_);
+    if (inputDevice_ != nullptr) inputDevice_->setTouchscreenGeometry(screenGeometry_);
+#ifdef USE_OMX
+    if (omxVideoOutput_ != nullptr) omxVideoOutput_->setDestRect();
+#else
+    if (qtVideoOutput_ != nullptr) qtVideoOutput_->resize();
 #endif
 }
 

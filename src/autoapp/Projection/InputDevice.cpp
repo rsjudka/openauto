@@ -225,6 +225,11 @@ QRect InputDevice::getTouchscreenGeometry() const
     return touchscreenGeometry_;
 }
 
+void InputDevice::setTouchscreenGeometry(QRect& touchscreenGeometry)
+{
+    touchscreenGeometry_ = touchscreenGeometry;
+}
+
 IInputDevice::ButtonCodes InputDevice::getSupportedButtonCodes() const
 {
     return configuration_->getButtonCodes();

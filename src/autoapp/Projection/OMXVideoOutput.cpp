@@ -249,14 +249,18 @@ void OMXVideoOutput::setOpacity(OMX_U32 alpha)
     alpha_ = alpha;
     if(isActive_)
     {
-        OMX_CONFIG_DISPLAYREGIONTYPE displayRegion;
-        displayRegion.nSize = sizeof(OMX_CONFIG_DISPLAYREGIONTYPE);
-        displayRegion.nVersion.nVersion = OMX_VERSION;
-        displayRegion.nPortIndex = 90;
-        displayRegion.alpha = alpha_;
-        displayRegion.set = static_cast<OMX_DISPLAYSETTYPE >(OMX_DISPLAY_SET_ALPHA);
+        this->setupDisplayRegion();
+    }
+}
 
-        OMX_SetConfig(ilclient_get_handle(components_[VideoComponent::RENDERER]), OMX_IndexConfigDisplayRegion, &displayRegion) == OMX_ErrorNone;
+void OMXVideoOutput::setDestRect(DestRect destRect)
+{
+    std::lock_guard<decltype(mutex_)> lock(mutex_);
+
+    destRect_ = destRect;
+    if(isActive_)
+    {
+        this->setupDisplayRegion();
     }
 }
 
