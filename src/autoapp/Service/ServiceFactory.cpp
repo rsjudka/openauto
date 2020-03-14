@@ -55,6 +55,9 @@ ServiceFactory::ServiceFactory(boost::asio::io_service& ioService, configuration
     , activeArea_(activeArea)
     , screenGeometry_(this->mapActiveAreaToGlobal(activeArea_))
     , activeCallback_(activeCallback)
+#ifdef USE_OMX
+    , omxVideoOutput_(std::make_shared<projection::OMXVideoOutput>(configuration_, this->QRectToDestRect(screenGeometry_), activeCallback_))
+#endif
 {
 
 }
@@ -77,7 +80,6 @@ ServiceList ServiceFactory::create(aasdk::messenger::IMessenger::Pointer messeng
 IService::Pointer ServiceFactory::createVideoService(aasdk::messenger::IMessenger::Pointer messenger)
 {
 #ifdef USE_OMX
-    omxVideoOutput_ = std::make_shared<projection::OMXVideoOutput>(configuration_, this->QRectToDestRect(screenGeometry_), activeCallback_);
     auto videoOutput(omxVideoOutput_);
 #else
     qtVideoOutput_ = new projection::QtVideoOutput(configuration_, activeArea_);
@@ -174,7 +176,7 @@ void ServiceFactory::resize()
     screenGeometry_ = this->mapActiveAreaToGlobal(activeArea_);
     if (inputDevice_ != nullptr) inputDevice_->setTouchscreenGeometry(screenGeometry_);
 #ifdef USE_OMX
-    if (omxVideoOutput_ != nullptr) omxVideoOutput_->setDestRect();
+    if (omxVideoOutput_ != nullptr) omxVideoOutput_->setDestRect(this->QRectToDestRect(screenGeometry_));
 #else
     if (qtVideoOutput_ != nullptr) qtVideoOutput_->resize();
 #endif
