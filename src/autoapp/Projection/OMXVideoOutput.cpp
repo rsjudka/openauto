@@ -114,9 +114,9 @@ bool OMXVideoOutput::open()
     }
 
     isActive_ = true;
-    if(this->activeCallback_ != nullptr)
+    if(activeCallback_ != nullptr)
     {
-        this->activeCallback_(isActive_);
+        activeCallback_(isActive_);
     }
     return true;
 }
@@ -219,9 +219,9 @@ void OMXVideoOutput::stop()
     if(isActive_)
     {
         isActive_ = false;
-        if(this->activeCallback_ != nullptr)
+        if(activeCallback_ != nullptr)
         {
-            this->activeCallback_(isActive_);
+            activeCallback_(isActive_);
         }
 
         ilclient_disable_tunnel(&tunnels_[0]);
@@ -242,23 +242,23 @@ void OMXVideoOutput::stop()
     }
 }
 
-void OMXVideoOutput::setOpacity(OMX_U32 alpha)
+void OMXVideoOutput::setOpacity(OMX_U32 alpha, bool skipUpdate)
 {
     std::lock_guard<decltype(mutex_)> lock(mutex_);
 
     alpha_ = alpha;
-    if(isActive_)
+    if(isActive_ && !skipUpdate)
     {
         this->setupDisplayRegion();
     }
 }
 
-void OMXVideoOutput::setDestRect(DestRect destRect)
+void OMXVideoOutput::setDestRect(DestRect destRect, bool skipUpdate)
 {
     std::lock_guard<decltype(mutex_)> lock(mutex_);
 
     destRect_ = destRect;
-    if(isActive_)
+    if(isActive_ && !skipUpdate)
     {
         this->setupDisplayRegion();
     }

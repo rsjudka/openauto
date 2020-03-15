@@ -39,7 +39,7 @@ public:
     ServiceFactory(boost::asio::io_service& ioService, configuration::IConfiguration::Pointer configuration, QWidget* activeArea=nullptr, std::function<void(bool)> activeCallback=nullptr);
     ServiceList create(aasdk::messenger::IMessenger::Pointer messenger) override;
     void setOpacity(unsigned int alpha);
-    void resize();
+    void resize(bool skipUpdate=false);
     static QRect mapActiveAreaToGlobal(QWidget* activeArea);
 #ifdef USE_OMX
     static projection::DestRect QRectToDestRect(QRect rect);

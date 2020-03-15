@@ -171,12 +171,12 @@ void ServiceFactory::setOpacity(unsigned int alpha)
 #endif
 }
 
-void ServiceFactory::resize()
+void ServiceFactory::resize(bool skipUpdate)
 {
     screenGeometry_ = this->mapActiveAreaToGlobal(activeArea_);
     if (inputDevice_ != nullptr) inputDevice_->setTouchscreenGeometry(screenGeometry_);
 #ifdef USE_OMX
-    if (omxVideoOutput_ != nullptr) omxVideoOutput_->setDestRect(this->QRectToDestRect(screenGeometry_));
+    if (omxVideoOutput_ != nullptr) omxVideoOutput_->setDestRect(this->QRectToDestRect(screenGeometry_), skipUpdate);
 #else
     if (qtVideoOutput_ != nullptr) qtVideoOutput_->resize();
 #endif
