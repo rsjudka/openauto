@@ -61,8 +61,8 @@ public:
     bool init() override;
     void write(uint64_t timestamp, const aasdk::common::DataConstBuffer& buffer) override;
     void stop() override;
-    void setOpacity(OMX_U32 alpha, bool skipUpdate=false);
-    void setDestRect(DestRect destRect, bool skipUpdate=false);
+    void setOpacity(OMX_U32 alpha);
+    void setDestRect(DestRect destRect);
 
 private:
     bool createComponents();

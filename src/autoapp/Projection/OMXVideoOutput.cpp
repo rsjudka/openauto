@@ -242,23 +242,23 @@ void OMXVideoOutput::stop()
     }
 }
 
-void OMXVideoOutput::setOpacity(OMX_U32 alpha, bool skipUpdate)
+void OMXVideoOutput::setOpacity(OMX_U32 alpha)
 {
     std::lock_guard<decltype(mutex_)> lock(mutex_);
 
     alpha_ = alpha;
-    if(isActive_ && !skipUpdate)
+    if(isActive_)
     {
         this->setupDisplayRegion();
     }
 }
 
-void OMXVideoOutput::setDestRect(DestRect destRect, bool skipUpdate)
+void OMXVideoOutput::setDestRect(DestRect destRect)
 {
     std::lock_guard<decltype(mutex_)> lock(mutex_);
 
     destRect_ = destRect;
-    if(isActive_ && !skipUpdate)
+    if(isActive_)
     {
         this->setupDisplayRegion();
     }
