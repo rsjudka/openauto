@@ -60,13 +60,13 @@ namespace VideoComponent
     static constexpr uint32_t SCHEDULER = 3;
 }
 
-OMXVideoOutput::OMXVideoOutput(configuration::IConfiguration::Pointer configuration, DestRect destRect, std::function<void(bool)> activeCallback)
+OMXVideoOutput::OMXVideoOutput(configuration::IConfiguration::Pointer configuration, OMX_U32 alpha, DestRect destRect, std::function<void(bool)> activeCallback)
     : VideoOutput(std::move(configuration))
     , isActive_(false)
     , portSettingsChanged_(false)
     , client_(nullptr)
     , destRect_(destRect)
-    , alpha_(255)
+    , alpha_(alpha)
     , activeCallback_(activeCallback)
 {
     memset(components_, 0, sizeof(components_));
@@ -114,10 +114,12 @@ bool OMXVideoOutput::open()
     }
 
     isActive_ = true;
+
     if(activeCallback_ != nullptr)
     {
-        activeCallback_(isActive_);
+        activeCallback_(true);
     }
+
     return true;
 }
 
@@ -214,15 +216,16 @@ void OMXVideoOutput::stop()
 {
     OPENAUTO_LOG(info) << "[OMXVideoOutput] stop.";
 
+    if(activeCallback_ != nullptr)
+    {
+        activeCallback_(false);
+    }
+
     std::lock_guard<decltype(mutex_)> lock(mutex_);
 
     if(isActive_)
     {
         isActive_ = false;
-        if(activeCallback_ != nullptr)
-        {
-            activeCallback_(isActive_);
-        }
 
         ilclient_disable_tunnel(&tunnels_[0]);
         ilclient_disable_tunnel(&tunnels_[1]);
