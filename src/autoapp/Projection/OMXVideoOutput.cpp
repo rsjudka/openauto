@@ -60,13 +60,13 @@ namespace VideoComponent
     static constexpr uint32_t SCHEDULER = 3;
 }
 
-OMXVideoOutput::OMXVideoOutput(configuration::IConfiguration::Pointer configuration, OMX_U32 alpha, DestRect destRect, std::function<void(bool)> activeCallback)
+OMXVideoOutput::OMXVideoOutput(configuration::IConfiguration::Pointer configuration, DestRect destRect, std::function<void(bool)> activeCallback)
     : VideoOutput(std::move(configuration))
     , isActive_(false)
     , portSettingsChanged_(false)
     , client_(nullptr)
     , destRect_(destRect)
-    , alpha_(alpha)
+    , alpha_(255)
     , activeCallback_(activeCallback)
 {
     memset(components_, 0, sizeof(components_));

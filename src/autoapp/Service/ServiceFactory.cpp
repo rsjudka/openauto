@@ -56,7 +56,7 @@ ServiceFactory::ServiceFactory(boost::asio::io_service& ioService, configuration
     , screenGeometry_(this->mapActiveAreaToGlobal(activeArea_))
     , activeCallback_(activeCallback)
 #ifdef USE_OMX
-    , omxVideoOutput_(std::make_shared<projection::OMXVideoOutput>(configuration_, this->activeAreaAlpha(activeArea_), this->QRectToDestRect(screenGeometry_), activeCallback_))
+    , omxVideoOutput_(std::make_shared<projection::OMXVideoOutput>(configuration_, this->QRectToDestRect(screenGeometry_), activeCallback_))
 #endif
 {
 
@@ -200,11 +200,6 @@ QRect ServiceFactory::mapActiveAreaToGlobal(QWidget* activeArea)
 projection::DestRect ServiceFactory::QRectToDestRect(QRect rect)
 {
     return projection::DestRect(rect.x(), rect.y(), rect.width(), rect.height());
-}
-
-unsigned int ServiceFactory::activeAreaAlpha(QWidget *activeArea)
-{
-    return (activeArea != nullptr) ? activeArea->windowOpacity() : 255;
 }
 #endif
 

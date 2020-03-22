@@ -55,7 +55,7 @@ struct DestRect
 class OMXVideoOutput: public VideoOutput
 {
 public:
-    OMXVideoOutput(configuration::IConfiguration::Pointer configuration, OMX_U32 alpha=255, DestRect destRect=DestRect(), std::function<void(bool)> activeCallback=nullptr);
+    OMXVideoOutput(configuration::IConfiguration::Pointer configuration, DestRect destRect=DestRect(), std::function<void(bool)> activeCallback=nullptr);
 
     bool open() override;
     bool init() override;

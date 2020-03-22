@@ -44,7 +44,6 @@ public:
     static QRect mapActiveAreaToGlobal(QWidget* activeArea);
 #ifdef USE_OMX
     static projection::DestRect QRectToDestRect(QRect rect);
-    static unsigned int activeAreaAlpha(QWidget *activeArea);
 #endif
 
 private:
