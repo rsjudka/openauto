@@ -40,7 +40,6 @@ public:
     ServiceList create(aasdk::messenger::IMessenger::Pointer messenger) override;
     void setOpacity(unsigned int alpha);
     void resize();
-    void syncVideoOutput();
     static QRect mapActiveAreaToGlobal(QWidget* activeArea);
 #ifdef USE_OMX
     static projection::DestRect QRectToDestRect(QRect rect);
