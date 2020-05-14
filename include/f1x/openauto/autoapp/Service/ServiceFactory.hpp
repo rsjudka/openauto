@@ -21,7 +21,8 @@
 #include <f1x/openauto/autoapp/Service/IServiceFactory.hpp>
 #include <f1x/openauto/autoapp/Configuration/IConfiguration.hpp>
 #include <f1x/openauto/autoapp/Projection/OMXVideoOutput.hpp>
-
+#include <f1x/openauto/autoapp/Projection/GSTVideoOutput.hpp>
+#include <QGst/Quick/VideoSurface>
 namespace f1x
 {
 namespace openauto
@@ -55,6 +56,11 @@ private:
     std::function<void(bool)> activeCallback_;
 #ifdef USE_OMX
     std::shared_ptr<projection::OMXVideoOutput> omxVideoOutput_;
+#endif
+#ifdef USE_GST
+    std::shared_ptr<projection::GSTVideoOutput> gstVideoOutput_;
+
+    QGst::Quick::VideoSurface *videoSurface_;
 #endif
 };
 
