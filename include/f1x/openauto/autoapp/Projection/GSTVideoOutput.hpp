@@ -38,7 +38,9 @@
 #include <QGst/Utils/ApplicationSource>
 #include <QGst/Ui/VideoWidget>
 #include <QGst/ElementFactory>
-
+#include <QGst/Quick/VideoSurface>
+#include <QQuickView> 
+#include <QQmlContext>
 namespace f1x
 {
 namespace openauto
@@ -69,7 +71,7 @@ private:
     static GstPadProbeReturn convert_probe(GstPad *pad, GstPadProbeInfo *info, void *user_data);
     static gboolean bus_callback(GstBus *bus, GstMessage *message, gpointer *ptr);
     QGst::ElementPtr m_videoSink;
-    std::unique_ptr<QGst::Ui::VideoWidget> videoWidget_;
+    QWidget* videoWidget_;
     GstElement *vid_pipeline = nullptr;
     GstAppSrc *vid_src = nullptr;
     std::mutex mutex_;

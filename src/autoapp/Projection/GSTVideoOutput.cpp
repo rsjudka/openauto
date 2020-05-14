@@ -47,14 +47,21 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
     , portSettingsChanged_(false)
     , videoContainer_(videoContainer)
 {
-    QGst::ElementPtr m_videoSink = QGst::ElementFactory::make("qwidget5videosink"); 
+    QQuickView *view = new QQuickView();
+    videoWidget_ = QWidget::createWindowContainer(view);
 
-    videoWidget_ = std::make_unique<QGst::Ui::VideoWidget>(videoContainer_);
+    QGst::Quick::VideoSurface *surface = new QGst::Quick::VideoSurface;
+    view->rootContext()->setContextProperty(QLatin1String("videoSurface"), surface);
+    view->setSource(QUrl("test.qml"));
+    view->show();
+
+    m_videoSink = surface->videoSink();
     GstBus *bus;
 
     GError *error = NULL;
-    const char* vid_launch_str = "appsrc name=mysrc is-live=true block=false max-latency=100 do-timestamp=true stream-type=stream ! "
+    const char* vid_launch_str = "appsrc name=mysrc is-live=true block=false max-latency=100 do-timestamp=true stream-type=stream !  "
                                  "queue ! "
+                                 
                                  "h264parse ! "
         #ifdef RPI
                                  "omxh264dec ! "
@@ -86,7 +93,9 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
     vid_src = GST_APP_SRC(gst_bin_get_by_name(GST_BIN(vid_pipeline), "mysrc"));
     gst_app_src_set_stream_type(vid_src, GST_APP_STREAM_TYPE_STREAM);
 
-    videoWidget_->setVideoSink(m_videoSink);
+    // videoWidget_->setVideoSink(m_videoSink);
+    videoWidget_->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+    videoWidget_->showFullScreen();
 
 }
 gboolean GSTVideoOutput::bus_callback(GstBus */* unused*/, GstMessage *message, gpointer *ptr) {
@@ -129,6 +138,10 @@ gboolean GSTVideoOutput::bus_callback(GstBus */* unused*/, GstMessage *message, 
 }
 bool GSTVideoOutput::open()
 {
+     GstElement *capsfilter = gst_bin_get_by_name(GST_BIN(vid_pipeline), "mycapsfilter");
+    GstPad *convert_pad = gst_element_get_static_pad(capsfilter, "sink");
+    gst_pad_add_probe (convert_pad,GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM,convert_probe, this, NULL);
+    gst_element_set_state(vid_pipeline, GST_STATE_PLAYING);
     return true;
 }
 
@@ -153,12 +166,9 @@ bool GSTVideoOutput::init()
 {
 
     OPENAUTO_LOG(info) << "[GSTVideoOutput] init";
-    GstElement *capsfilter = gst_bin_get_by_name(GST_BIN(vid_pipeline), "mycapsfilter");
-    GstPad *convert_pad = gst_element_get_static_pad(capsfilter, "sink");
-    gst_pad_add_probe (convert_pad,GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM,convert_probe, this, NULL);
-    gst_element_set_state(vid_pipeline, GST_STATE_PLAYING);
-    videoWidget_->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
-    videoWidget_->showFullScreen();
+   
+    videoWidget_->resize(800,400);
+
     return true;
 }
 bool GSTVideoOutput::setupDisplayRegion()
