@@ -94,8 +94,7 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
     gst_app_src_set_stream_type(vid_src, GST_APP_STREAM_TYPE_STREAM);
 
     // videoWidget_->setVideoSink(m_videoSink);
-    videoWidget_->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
-    videoWidget_->showFullScreen();
+    
 
 }
 gboolean GSTVideoOutput::bus_callback(GstBus */* unused*/, GstMessage *message, gpointer *ptr) {
@@ -166,8 +165,9 @@ bool GSTVideoOutput::init()
 {
 
     OPENAUTO_LOG(info) << "[GSTVideoOutput] init";
-   
-    videoWidget_->resize(800,400);
+   videoWidget_->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+    videoWidget_->showFullScreen();
+    // videoWidget_->resize(800,400);
 
     return true;
 }
