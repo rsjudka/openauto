@@ -30,8 +30,9 @@ add_definitions(-DBOOST_ALL_DYN_LINK)
 
 find_package(Boost REQUIRED COMPONENTS system log OPTIONAL_COMPONENTS unit_test_framework)
 find_package(libusb-1.0 REQUIRED)
-find_package(Qt5 COMPONENTS Multimedia MultimediaWidgets Bluetooth Qml Quick REQUIRED)
+find_package(Qt5 COMPONENTS Multimedia MultimediaWidgets Bluetooth Qml Quick QuickWidgets REQUIRED)
 find_package(Qt5GStreamer)
+
 find_package(Protobuf REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(rtaudio REQUIRED)
@@ -96,6 +97,7 @@ target_link_libraries(autoapp
                         ${Boost_LIBRARIES}
                         ${Qt5Multimedia_LIBRARIES}
                         ${Qt5MultimediaWidgets_LIBRARIES}
+                        ${Qt5QuickWidgets_LIBRARIES}
                         ${Qt5Bluetooth_LIBRARIES}
                         ${LIBUSB_1_LIBRARIES}
                         ${PROTOBUF_LIBRARIES}

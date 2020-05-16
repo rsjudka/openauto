@@ -47,13 +47,15 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
     , portSettingsChanged_(false)
     , videoContainer_(videoContainer)
 {
-    QQuickView *view = new QQuickView();
-    videoWidget_ = QWidget::createWindowContainer(view);
+    this->moveToThread(QApplication::instance()->thread());
+    videoWidget_ = new QQuickWidget(videoContainer);
 
-    QGst::Quick::VideoSurface *surface = new QGst::Quick::VideoSurface;
-    view->rootContext()->setContextProperty(QLatin1String("videoSurface"), surface);
-    view->setSource(QUrl("test.qml"));
-    view->show();
+
+    surface = new QGst::Quick::VideoSurface;
+    videoWidget_->rootContext()->setContextProperty(QLatin1String("videoSurface"), surface);
+    videoWidget_->setSource(QUrl("test.qml"));
+    videoWidget_->show();
+    videoWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView); 
 
     m_videoSink = surface->videoSink();
     GstBus *bus;
@@ -93,10 +95,10 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
     vid_src = GST_APP_SRC(gst_bin_get_by_name(GST_BIN(vid_pipeline), "mysrc"));
     gst_app_src_set_stream_type(vid_src, GST_APP_STREAM_TYPE_STREAM);
 
-    // videoWidget_->setVideoSink(m_videoSink);
-    
-
+    connect(this, &GSTVideoOutput::startPlayback, this, &GSTVideoOutput::onStartPlayback, Qt::QueuedConnection);
 }
+
+
 gboolean GSTVideoOutput::bus_callback(GstBus */* unused*/, GstMessage *message, gpointer *ptr) {
     gchar *debug;
     GError *err;
@@ -155,6 +157,7 @@ GstPadProbeReturn GSTVideoOutput::convert_probe(GstPad *pad, GstPadProbeInfo *in
                 OPENAUTO_LOG(info) << "[GSTVideoOutput] Video Width: "<<vinfo->width;
                 OPENAUTO_LOG(info) << "[GSTVideoOutput] Video Height: "<<vinfo->height;
 
+
             }
             return GST_PAD_PROBE_REMOVE;
         }
@@ -165,17 +168,9 @@ bool GSTVideoOutput::init()
 {
 
     OPENAUTO_LOG(info) << "[GSTVideoOutput] init";
-   videoWidget_->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
-    videoWidget_->showFullScreen();
-    // videoWidget_->resize(800,400);
-
+    emit startPlayback();
     return true;
 }
-bool GSTVideoOutput::setupDisplayRegion()
-{
-    
-}
-
 void GSTVideoOutput::write(uint64_t timestamp, const aasdk::common::DataConstBuffer& buffer)
 {
     GstBuffer * buffer_ = gst_buffer_new_and_alloc(buffer.size);
@@ -184,7 +179,26 @@ void GSTVideoOutput::write(uint64_t timestamp, const aasdk::common::DataConstBuf
     if (ret != GST_FLOW_OK) {
         OPENAUTO_LOG(info)<<"[GSTVideoOutput] push buffer returned "<< ret <<" for "<< buffer.size <<"bytes";
     }
-    // OPENAUTO_LOG(info)<<"[GSTVideoOutput] write";
+
+}
+
+void GSTVideoOutput::onStartPlayback()
+{
+    
+    if (videoContainer_ == nullptr)
+    {
+        OPENAUTO_LOG(info)<<"[GSTVideoOutput] No video container, setting projection fullscreen";
+        videoWidget_->setFocus();
+        videoWidget_->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+        videoWidget_->showFullScreen();
+    }
+    else
+    {
+        OPENAUTO_LOG(info)<<"[GSTVideoOutput] Resizing to video container";
+        videoWidget_->resize(videoContainer_->size());
+    }
+
+
 
 }
 
@@ -195,25 +209,6 @@ void GSTVideoOutput::stop()
 }
 
 
-bool GSTVideoOutput::createComponents()
-{
-    
-}
-
-bool GSTVideoOutput::initClock()
-{
-
-}
-
-bool GSTVideoOutput::setupTunnels()
-{
-
-}
-
-bool GSTVideoOutput::enablePortBuffers()
-{
-   
-}
 
 }
 }

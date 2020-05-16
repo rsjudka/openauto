@@ -69,6 +69,11 @@ void QtVideoOutput::write(uint64_t, const aasdk::common::DataConstBuffer& buffer
     videoBuffer_.write(reinterpret_cast<const char*>(buffer.cdata), buffer.size);
 }
 
+void QtVideoOutput::resize()
+{
+    if (videoWidget_ != nullptr && videoContainer_ != nullptr) videoWidget_->resize(videoContainer_->size());
+}
+
 void QtVideoOutput::onStartPlayback()
 {
     if (videoContainer_ == nullptr)

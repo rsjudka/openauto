@@ -45,6 +45,7 @@ public:
     bool eventFilter(QObject* obj, QEvent* event) override;
     bool hasTouchscreen() const override;
     QRect getTouchscreenGeometry() const override;
+    void setTouchscreenGeometry(QRect& touchscreenGeometry);
 
 private:
     void setVideoGeometry();

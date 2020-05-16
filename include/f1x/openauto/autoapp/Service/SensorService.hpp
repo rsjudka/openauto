@@ -33,7 +33,7 @@ namespace service
 class SensorService: public aasdk::channel::sensor::ISensorServiceChannelEventHandler, public IService, public std::enable_shared_from_this<SensorService>
 {
 public:
-    SensorService(boost::asio::io_service& ioService, aasdk::messenger::IMessenger::Pointer messenger);
+    SensorService(boost::asio::io_service& ioService, aasdk::messenger::IMessenger::Pointer messenger, bool nightMode = false);
 
     void start() override;
     void stop() override;
@@ -41,6 +41,7 @@ public:
     void onChannelOpenRequest(const aasdk::proto::messages::ChannelOpenRequest& request) override;
     void onSensorStartRequest(const aasdk::proto::messages::SensorStartRequestMessage& request) override;
     void onChannelError(const aasdk::error::Error& e) override;
+    void setNightMode(bool nightMode);
 
 private:
     using std::enable_shared_from_this<SensorService>::shared_from_this;
@@ -49,6 +50,7 @@ private:
 
     boost::asio::io_service::strand strand_;
     aasdk::channel::sensor::SensorServiceChannel::Pointer channel_;
+    bool nightMode_;
 };
 
 }

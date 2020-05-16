@@ -29,9 +29,10 @@ namespace autoapp
 namespace service
 {
 
-SensorService::SensorService(boost::asio::io_service& ioService, aasdk::messenger::IMessenger::Pointer messenger)
+SensorService::SensorService(boost::asio::io_service& ioService, aasdk::messenger::IMessenger::Pointer messenger, bool nightMode)
     : strand_(ioService)
     , channel_(std::make_shared<aasdk::channel::sensor::SensorServiceChannel>(strand_, std::move(messenger)))
+    , nightMode_(nightMode)
 {
 
 }
@@ -121,7 +122,7 @@ void SensorService::sendDrivingStatusUnrestricted()
 void SensorService::sendNightData()
 {
     aasdk::proto::messages::SensorEventIndication indication;
-    indication.add_night_mode()->set_is_night(false);
+    indication.add_night_mode()->set_is_night(nightMode_);
 
     auto promise = aasdk::channel::SendPromise::defer(strand_);
     promise->then([]() {}, std::bind(&SensorService::onChannelError, this->shared_from_this(), std::placeholders::_1));
@@ -131,6 +132,12 @@ void SensorService::sendNightData()
 void SensorService::onChannelError(const aasdk::error::Error& e)
 {
     OPENAUTO_LOG(error) << "[SensorService] channel error: " << e.what();
+}
+
+void SensorService::setNightMode(bool nightMode)
+{
+    nightMode_ = nightMode;
+    this->sendNightData();
 }
 
 }

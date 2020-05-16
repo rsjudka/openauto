@@ -39,8 +39,10 @@
 #include <QGst/Ui/VideoWidget>
 #include <QGst/ElementFactory>
 #include <QGst/Quick/VideoSurface>
-#include <QQuickView> 
-#include <QQmlContext>
+#include <QtQml/QQmlContext>
+#include <QtQuickWidgets/QQuickWidget>
+#include <QApplication>
+
 namespace f1x
 {
 namespace openauto
@@ -52,8 +54,10 @@ namespace projection
 
 
 
-class GSTVideoOutput: public VideoOutput
+class GSTVideoOutput: public QObject, public VideoOutput, boost::noncopyable
 {
+    Q_OBJECT
+
 public:
     GSTVideoOutput(configuration::IConfiguration::Pointer configuration, QWidget* videoContainer=nullptr);
 
@@ -62,16 +66,18 @@ public:
     void write(uint64_t timestamp, const aasdk::common::DataConstBuffer& buffer) override;
     void stop() override;
 
+protected slots:
+    void onStartPlayback();
+
+signals:
+    void startPlayback();
+    void stopPlayback();
 private:
-    bool createComponents();
-    bool initClock();
-    bool setupTunnels();
-    bool enablePortBuffers();
-    bool setupDisplayRegion();
     static GstPadProbeReturn convert_probe(GstPad *pad, GstPadProbeInfo *info, void *user_data);
     static gboolean bus_callback(GstBus *bus, GstMessage *message, gpointer *ptr);
+
     QGst::ElementPtr m_videoSink;
-    QWidget* videoWidget_;
+    QQuickWidget* videoWidget_;
     GstElement *vid_pipeline = nullptr;
     GstAppSrc *vid_src = nullptr;
     std::mutex mutex_;
@@ -79,6 +85,7 @@ private:
     bool portSettingsChanged_;
     std::function<void(bool)> activeCallback_;
     QWidget* videoContainer_;
+    QGst::Quick::VideoSurface *surface;
 
 };
 
