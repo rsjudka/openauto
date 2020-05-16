@@ -66,16 +66,13 @@ private:
 #else
     projection::QtVideoOutput *qtVideoOutput_;
 #endif
-<<<<<<< HEAD
 #ifdef USE_GST
     std::shared_ptr<projection::GSTVideoOutput> gstVideoOutput_;
 
     QGst::Quick::VideoSurface *videoSurface_;
 #endif
-=======
     bool nightMode_;
     std::weak_ptr<SensorService> sensorService_;
->>>>>>> upstream/develop
 };
 
 }
