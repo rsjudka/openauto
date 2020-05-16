@@ -15,6 +15,7 @@
 *  You should have received a copy of the GNU General Public License
 *  along with openauto. If not, see <http://www.gnu.org/licenses/>.
 */
+#ifdef USE_GST
 
 #pragma once
 #include <mutex>
@@ -65,7 +66,7 @@ public:
     bool init() override;
     void write(uint64_t timestamp, const aasdk::common::DataConstBuffer& buffer) override;
     void stop() override;
-
+    void resize();
 protected slots:
     void onStartPlayback();
 
@@ -94,3 +95,4 @@ private:
 }
 }
 
+#endif

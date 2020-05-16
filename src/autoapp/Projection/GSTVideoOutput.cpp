@@ -208,7 +208,12 @@ void GSTVideoOutput::stop()
     gst_element_set_state(vid_pipeline, GST_STATE_PAUSED);
 }
 
+void GSTVideoOutput::resize()
+{
+    OPENAUTO_LOG(info) << "[GSTVideoOutput] Got resize request to "<<videoContainer_->width()<<"x"<<videoContainer_->height();
 
+    if (videoWidget_ != nullptr && videoContainer_ != nullptr) videoWidget_->resize(videoContainer_->size());
+}
 
 }
 }

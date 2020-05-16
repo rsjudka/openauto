@@ -32,6 +32,7 @@
 #include <f1x/openauto/autoapp/Service/InputService.hpp>
 #include <f1x/openauto/autoapp/Projection/QtVideoOutput.hpp>
 #include <f1x/openauto/autoapp/Projection/GSTVideoOutput.hpp>
+#include <f1x/openauto/autoapp/Projection/OMXVideoOutput.hpp>
 #include <f1x/openauto/autoapp/Projection/RtAudioOutput.hpp>
 #include <f1x/openauto/autoapp/Projection/QtAudioOutput.hpp>
 #include <f1x/openauto/autoapp/Projection/QtAudioInput.hpp>
@@ -56,7 +57,7 @@ ServiceFactory::ServiceFactory(boost::asio::io_service& ioService, configuration
     , screenGeometry_(this->mapActiveAreaToGlobal(activeArea_))
     , activeCallback_(activeCallback)
 #ifdef USE_OMX
-    , omxVideoOutput_(std::make_shared<projection::OMXVideoOutput>(configuration_, activeArea_))
+    , omxVideoOutput_(std::make_shared<projection::OMXVideoOutput>(configuration_, this->QRectToDestRect(screenGeometry_), activeCallback_))
 #endif
     , nightMode_(nightMode)
 {
@@ -189,6 +190,10 @@ void ServiceFactory::resize()
     if (inputDevice_ != nullptr) inputDevice_->setTouchscreenGeometry(screenGeometry_);
 #ifdef USE_OMX
     if (omxVideoOutput_ != nullptr) omxVideoOutput_->setDestRect(this->QRectToDestRect(screenGeometry_));
+#elif defined USE_GST
+    if (gstVideoOutput_ != nullptr){
+        gstVideoOutput_->resize();
+    }
 #else
     if (qtVideoOutput_ != nullptr) qtVideoOutput_->resize();
 #endif
