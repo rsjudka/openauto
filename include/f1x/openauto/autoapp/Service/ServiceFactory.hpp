@@ -68,8 +68,6 @@ private:
 #endif
 #ifdef USE_GST
     std::shared_ptr<projection::GSTVideoOutput> gstVideoOutput_;
-
-    QGst::Quick::VideoSurface *videoSurface_;
 #endif
     bool nightMode_;
     std::weak_ptr<SensorService> sensorService_;

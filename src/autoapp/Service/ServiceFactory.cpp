@@ -63,7 +63,8 @@ ServiceFactory::ServiceFactory(boost::asio::io_service& ioService, configuration
 {
     #ifdef USE_GST
     QGst::init(nullptr, nullptr);
-    gstVideoOutput_ = std::make_shared<projection::GSTVideoOutput>(configuration_, activeArea_);
+    gstVideoOutput_ = std::make_shared<projection::GSTVideoOutput>(configuration_, activeArea_, activeCallback_);
+    
     #endif
 
 

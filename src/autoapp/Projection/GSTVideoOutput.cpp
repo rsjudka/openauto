@@ -41,11 +41,12 @@ namespace VideoComponent
     static constexpr uint32_t SCHEDULER = 3;
 }
 
-GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configuration, QWidget* videoContainer)
+GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configuration, QWidget* videoContainer, std::function<void(bool)> activeCallback)
     : VideoOutput(std::move(configuration))
     , isActive_(false)
     , portSettingsChanged_(false)
     , videoContainer_(videoContainer)
+    , activeCallback_(activeCallback)
 {
     this->moveToThread(QApplication::instance()->thread());
     videoWidget_ = new QQuickWidget(videoContainer);
@@ -53,8 +54,7 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
 
     surface = new QGst::Quick::VideoSurface;
     videoWidget_->rootContext()->setContextProperty(QLatin1String("videoSurface"), surface);
-    videoWidget_->setSource(QUrl("test.qml"));
-    videoWidget_->show();
+    videoWidget_->setSource(QUrl("qrc:/aaVideo.qml"));
     videoWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView); 
 
     m_videoSink = surface->videoSink();
@@ -85,7 +85,9 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
     
 
     GstElement *sink = QGlib::RefPointer<QGst::Element>(m_videoSink);
-    g_object_set (sink, "force-aspect-ratio", true, nullptr);
+    // g_object_set (sink, "force-aspect-ratio", true, nullptr);
+    g_object_set (sink, "force-aspect-ratio", false, nullptr);
+
     g_object_set (sink, "sync", false, nullptr);
     g_object_set (sink, "async", false, nullptr);
     GstElement *capsfilter = gst_bin_get_by_name(GST_BIN(vid_pipeline), "mycapsfilter");
@@ -96,6 +98,8 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
     gst_app_src_set_stream_type(vid_src, GST_APP_STREAM_TYPE_STREAM);
 
     connect(this, &GSTVideoOutput::startPlayback, this, &GSTVideoOutput::onStartPlayback, Qt::QueuedConnection);
+    connect(this, &GSTVideoOutput::stopPlayback, this, &GSTVideoOutput::onStopPlayback, Qt::QueuedConnection);
+
 }
 
 
@@ -184,7 +188,10 @@ void GSTVideoOutput::write(uint64_t timestamp, const aasdk::common::DataConstBuf
 
 void GSTVideoOutput::onStartPlayback()
 {
-    
+    if(activeCallback_ != nullptr)
+    {
+        activeCallback_(true);
+    }
     if (videoContainer_ == nullptr)
     {
         OPENAUTO_LOG(info)<<"[GSTVideoOutput] No video container, setting projection fullscreen";
@@ -197,6 +204,8 @@ void GSTVideoOutput::onStartPlayback()
         OPENAUTO_LOG(info)<<"[GSTVideoOutput] Resizing to video container";
         videoWidget_->resize(videoContainer_->size());
     }
+    // videoWidget_->setWindowFlags(Qt::Window);
+    videoWidget_->show();
 
 
 
@@ -204,9 +213,24 @@ void GSTVideoOutput::onStartPlayback()
 
 void GSTVideoOutput::stop()
 {
+    emit stopPlayback();
+}
+
+
+void GSTVideoOutput::onStopPlayback()
+{
+    
+    if(activeCallback_ != nullptr)
+    {
+        activeCallback_(false);
+    }
     OPENAUTO_LOG(info) << "[GSTVideoOutput] stop.";
     gst_element_set_state(vid_pipeline, GST_STATE_PAUSED);
+    videoWidget_->hide();
+
+
 }
+
 
 void GSTVideoOutput::resize()
 {

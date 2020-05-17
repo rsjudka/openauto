@@ -53,26 +53,24 @@ namespace autoapp
 namespace projection
 {
 
-
-
 class GSTVideoOutput: public QObject, public VideoOutput, boost::noncopyable
 {
     Q_OBJECT
 
 public:
-    GSTVideoOutput(configuration::IConfiguration::Pointer configuration, QWidget* videoContainer=nullptr);
+    GSTVideoOutput(configuration::IConfiguration::Pointer configuration, QWidget* videoContainer=nullptr, std::function<void(bool)> activeCallback = nullptr);
 
     bool open() override;
     bool init() override;
     void write(uint64_t timestamp, const aasdk::common::DataConstBuffer& buffer) override;
     void stop() override;
     void resize();
-protected slots:
-    void onStartPlayback();
-
 signals:
     void startPlayback();
     void stopPlayback();
+protected slots:
+    void onStartPlayback();
+    void onStopPlayback();
 private:
     static GstPadProbeReturn convert_probe(GstPad *pad, GstPadProbeInfo *info, void *user_data);
     static gboolean bus_callback(GstBus *bus, GstMessage *message, gpointer *ptr);
@@ -84,10 +82,9 @@ private:
     std::mutex mutex_;
     bool isActive_;
     bool portSettingsChanged_;
-    std::function<void(bool)> activeCallback_;
     QWidget* videoContainer_;
     QGst::Quick::VideoSurface *surface;
-
+    std::function<void(bool)> activeCallback_;
 };
 
 }
