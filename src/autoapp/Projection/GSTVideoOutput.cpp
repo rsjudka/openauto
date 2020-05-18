@@ -102,6 +102,10 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
 
 }
 
+GSTVideoOutput::~GSTVideoOutput() {
+    gst_object_unref(vid_pipeline);
+    gst_object_unref(vid_src);
+}
 
 gboolean GSTVideoOutput::bus_callback(GstBus */* unused*/, GstMessage *message, gpointer *ptr) {
     gchar *debug;

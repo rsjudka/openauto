@@ -59,7 +59,7 @@ class GSTVideoOutput: public QObject, public VideoOutput, boost::noncopyable
 
 public:
     GSTVideoOutput(configuration::IConfiguration::Pointer configuration, QWidget* videoContainer=nullptr, std::function<void(bool)> activeCallback = nullptr);
-
+    ~GSTVideoOutput();
     bool open() override;
     bool init() override;
     void write(uint64_t timestamp, const aasdk::common::DataConstBuffer& buffer) override;
