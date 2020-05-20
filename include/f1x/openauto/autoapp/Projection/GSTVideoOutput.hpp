@@ -58,7 +58,7 @@ class GSTVideoOutput: public QObject, public VideoOutput, boost::noncopyable
     Q_OBJECT
 
 public:
-    GSTVideoOutput(configuration::IConfiguration::Pointer configuration, QWidget* videoContainer=nullptr, std::function<void(bool)> activeCallback = nullptr);
+    GSTVideoOutput(configuration::IConfiguration::Pointer configuration, QWidget* videoContainer=nullptr, std::function<void(bool)> activeCallback=nullptr);
     ~GSTVideoOutput();
     bool open() override;
     bool init() override;
@@ -75,10 +75,10 @@ private:
     static GstPadProbeReturn convert_probe(GstPad *pad, GstPadProbeInfo *info, void *user_data);
     static gboolean bus_callback(GstBus *bus, GstMessage *message, gpointer *ptr);
 
-    QGst::ElementPtr m_videoSink;
+    QGst::ElementPtr videoSink_;
     QQuickWidget* videoWidget_;
-    GstElement *vid_pipeline = nullptr;
-    GstAppSrc *vid_src = nullptr;
+    GstElement *vidPipeline = nullptr;
+    GstAppSrc *vidSrc = nullptr;
     std::mutex mutex_;
     bool isActive_;
     bool portSettingsChanged_;

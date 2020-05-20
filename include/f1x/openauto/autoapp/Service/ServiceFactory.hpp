@@ -63,11 +63,10 @@ private:
     std::shared_ptr<projection::InputDevice> inputDevice_;
 #ifdef USE_OMX
     std::shared_ptr<projection::OMXVideoOutput> omxVideoOutput_;
+#elif defined USE_GST
+    std::shared_ptr<projection::GSTVideoOutput> gstVideoOutput_;
 #else
     projection::QtVideoOutput *qtVideoOutput_;
-#endif
-#ifdef USE_GST
-    std::shared_ptr<projection::GSTVideoOutput> gstVideoOutput_;
 #endif
     bool nightMode_;
     std::weak_ptr<SensorService> sensorService_;
