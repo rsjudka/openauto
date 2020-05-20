@@ -94,12 +94,14 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
     connect(this, &GSTVideoOutput::stopPlayback, this, &GSTVideoOutput::onStopPlayback, Qt::QueuedConnection);
 }
 
-GSTVideoOutput::~GSTVideoOutput() {
+GSTVideoOutput::~GSTVideoOutput()
+{
     gst_object_unref(vidPipeline);
     gst_object_unref(vidSrc);
 }
 
-gboolean GSTVideoOutput::bus_callback(GstBus */* unused*/, GstMessage *message, gpointer *ptr) {
+gboolean GSTVideoOutput::bus_callback(GstBus */* unused*/, GstMessage *message, gpointer *ptr)
+{
     gchar *debug;
     GError *err;
     gchar *name;
@@ -151,7 +153,8 @@ GstPadProbeReturn GSTVideoOutput::convert_probe(GstPad *pad, GstPadProbeInfo *in
     if(GST_PAD_PROBE_INFO_TYPE(info) & GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM) {
         if(GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT) {
             GstCaps *caps  = gst_pad_get_current_caps(pad);
-            if(caps != NULL){
+            if(caps != NULL)
+            {
                 GstVideoInfo *vinfo = gst_video_info_new();
                 gst_video_info_from_caps(vinfo, caps);
                 OPENAUTO_LOG(info) << "[GSTVideoOutput] Video Width: "<< vinfo->width;
