@@ -66,13 +66,22 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
                                  
                                  "h264parse ! "
         #ifdef RPI
-                                 "omxh264dec ! "
+            #ifdef PI4
+                                 " v4l2h264dec !"
+            #else
+                                 " omxh264dec ! "
+            #endif
         #else
                                  "avdec_h264 ! "
         #endif
                                  "capsfilter caps=video/x-raw name=mycapsfilter";
     #ifdef RPI
-        OPENAUTO_LOG(info) << "[GSTVideoOutput] RPI Build, running with omxh264dec";
+        OPENAUTO_LOG(info) << "[GSTVideoOutput] RPI Build, running with "<<
+        #ifdef PI4
+        "v4l2h264dec";
+        #else
+        "omxh264dec";
+        #endif
     #endif
     
     
