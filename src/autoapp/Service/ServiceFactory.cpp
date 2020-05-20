@@ -63,10 +63,7 @@ ServiceFactory::ServiceFactory(boost::asio::io_service& ioService, configuration
 #endif
     , nightMode_(nightMode)
 {
-    #ifdef USE_GST
     QGst::init(nullptr, nullptr);
-    gstVideoOutput_ = std::make_shared<projection::GSTVideoOutput>(configuration_, activeArea_, activeCallback_);
-    #endif
 
 
 }
@@ -193,9 +190,7 @@ void ServiceFactory::resize()
 #ifdef USE_OMX
     if (omxVideoOutput_ != nullptr) omxVideoOutput_->setDestRect(this->QRectToDestRect(screenGeometry_));
 #elif defined USE_GST
-    if (gstVideoOutput_ != nullptr){
-        gstVideoOutput_->resize();
-    }
+    if (gstVideoOutput_ != nullptr) gstVideoOutput_->resize();
 #else
     if (qtVideoOutput_ != nullptr) qtVideoOutput_->resize();
 #endif

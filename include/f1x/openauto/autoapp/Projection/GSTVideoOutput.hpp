@@ -79,9 +79,6 @@ private:
     QQuickWidget* videoWidget_;
     GstElement *vidPipeline = nullptr;
     GstAppSrc *vidSrc = nullptr;
-    std::mutex mutex_;
-    bool isActive_;
-    bool portSettingsChanged_;
     QWidget* videoContainer_;
     QGst::Quick::VideoSurface *surface;
     std::function<void(bool)> activeCallback_;

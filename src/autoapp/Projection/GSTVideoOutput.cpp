@@ -35,8 +35,6 @@ namespace projection
 
 GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configuration, QWidget* videoContainer, std::function<void(bool)> activeCallback)
     : VideoOutput(std::move(configuration))
-    , isActive_(false)
-    , portSettingsChanged_(false)
     , videoContainer_(videoContainer)
     , activeCallback_(activeCallback)
 {
