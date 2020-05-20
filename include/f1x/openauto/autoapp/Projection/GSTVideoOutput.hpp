@@ -77,10 +77,10 @@ private:
 
     QGst::ElementPtr videoSink_;
     QQuickWidget* videoWidget_;
-    GstElement *vidPipeline = nullptr;
-    GstAppSrc *vidSrc = nullptr;
+    GstElement *vidPipeline_ = nullptr;
+    GstAppSrc *vidSrc_ = nullptr;
     QWidget* videoContainer_;
-    QGst::Quick::VideoSurface *surface;
+    QGst::Quick::VideoSurface *surface_;
     std::function<void(bool)> activeCallback_;
 };
 

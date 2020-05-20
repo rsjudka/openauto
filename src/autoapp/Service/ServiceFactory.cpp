@@ -59,11 +59,10 @@ ServiceFactory::ServiceFactory(boost::asio::io_service& ioService, configuration
 #ifdef USE_OMX
     , omxVideoOutput_(std::make_shared<projection::OMXVideoOutput>(configuration_, this->QRectToDestRect(screenGeometry_), activeCallback_))
 #elif defined USE_GST
-    , gstVideoOutput_(std::make_shared<projection::GSTVideoOutput>(configuration_, activeArea_, activeCallback_))
+    , gstVideoOutput_((QGst::init(nullptr, nullptr), std::make_shared<projection::GSTVideoOutput>(configuration_, activeArea_, activeCallback_)))
 #endif
     , nightMode_(nightMode)
 {
-    QGst::init(nullptr, nullptr);
 
 
 }

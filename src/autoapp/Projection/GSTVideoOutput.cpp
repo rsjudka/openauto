@@ -41,12 +41,12 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
     this->moveToThread(QApplication::instance()->thread());
     videoWidget_ = new QQuickWidget(videoContainer_);
 
-    surface = new QGst::Quick::VideoSurface;
-    videoWidget_->rootContext()->setContextProperty(QLatin1String("videoSurface"), surface);
-    videoWidget_->setSource(QUrl("qrc:/aaVideo.qml"));
+    surface_ = new QGst::Quick::VideoSurface;
+    videoWidget_->rootContext()->setContextProperty(QLatin1String("videoSurface"), surface_);
+    videoWidget_->setSource(QUrl("qrc:/aa_video.qml"));
     videoWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView); 
 
-    videoSink_ = surface->videoSink();
+    videoSink_ = surface_->videoSink();
     GstBus *bus;
 
     GError *error = NULL;
@@ -73,8 +73,8 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
         #endif
     #endif
     
-    vidPipeline = gst_parse_launch(vidLaunchStr, &error);
-    bus = gst_pipeline_get_bus(GST_PIPELINE(vidPipeline));
+    vidPipeline_ = gst_parse_launch(vidLaunchStr, &error);
+    bus = gst_pipeline_get_bus(GST_PIPELINE(vidPipeline_));
     gst_bus_add_watch(bus, (GstBusFunc)GSTVideoOutput::bus_callback, this);
     gst_object_unref(bus);
 
@@ -83,20 +83,20 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
 
     g_object_set (sink, "sync", false, nullptr);
     g_object_set (sink, "async", false, nullptr);
-    GstElement *capsFilter = gst_bin_get_by_name(GST_BIN(vidPipeline), "mycapsfilter");
-    gst_bin_add(GST_BIN(vidPipeline), GST_ELEMENT(sink));
+    GstElement *capsFilter = gst_bin_get_by_name(GST_BIN(vidPipeline_), "mycapsfilter");
+    gst_bin_add(GST_BIN(vidPipeline_), GST_ELEMENT(sink));
     gst_element_link(capsFilter, GST_ELEMENT(sink));
 
-    vidSrc = GST_APP_SRC(gst_bin_get_by_name(GST_BIN(vidPipeline), "mysrc"));
-    gst_app_src_set_stream_type(vidSrc, GST_APP_STREAM_TYPE_STREAM);
+    vidSrc_ = GST_APP_SRC(gst_bin_get_by_name(GST_BIN(vidPipeline_), "mysrc"));
+    gst_app_src_set_stream_type(vidSrc_, GST_APP_STREAM_TYPE_STREAM);
 
     connect(this, &GSTVideoOutput::startPlayback, this, &GSTVideoOutput::onStartPlayback, Qt::QueuedConnection);
     connect(this, &GSTVideoOutput::stopPlayback, this, &GSTVideoOutput::onStopPlayback, Qt::QueuedConnection);
 }
 
 GSTVideoOutput::~GSTVideoOutput() {
-    gst_object_unref(vidPipeline);
-    gst_object_unref(vidSrc);
+    gst_object_unref(vidPipeline_);
+    gst_object_unref(vidSrc_);
 }
 
 gboolean GSTVideoOutput::bus_callback(GstBus */* unused*/, GstMessage *message, gpointer *ptr) {
@@ -138,10 +138,10 @@ gboolean GSTVideoOutput::bus_callback(GstBus */* unused*/, GstMessage *message, 
 
 bool GSTVideoOutput::open()
 {
-     GstElement *capsFilter = gst_bin_get_by_name(GST_BIN(vidPipeline), "mycapsfilter");
+     GstElement *capsFilter = gst_bin_get_by_name(GST_BIN(vidPipeline_), "mycapsfilter");
     GstPad *convertPad = gst_element_get_static_pad(capsFilter, "sink");
-    gst_pad_add_probe (convertPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, convertProbe, this, NULL);
-    gst_element_set_state(vidPipeline, GST_STATE_PLAYING);
+    gst_pad_add_probe (convertPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, convert_probe, this, NULL);
+    gst_element_set_state(vidPipeline_, GST_STATE_PLAYING);
     return true;
 }
 
@@ -177,7 +177,7 @@ void GSTVideoOutput::write(uint64_t timestamp, const aasdk::common::DataConstBuf
 {
     GstBuffer* buffer_ = gst_buffer_new_and_alloc(buffer.size);
     gst_buffer_fill(buffer_, 0, buffer.cdata, buffer.size);
-    int ret = gst_app_src_push_buffer((GstAppSrc *)vidSrc, buffer_);
+    int ret = gst_app_src_push_buffer((GstAppSrc *)vidSrc_, buffer_);
     if(ret != GST_FLOW_OK)
     {
         OPENAUTO_LOG(info) << "[GSTVideoOutput] push buffer returned " << ret << " for " << buffer.size << "bytes";
@@ -217,7 +217,7 @@ void GSTVideoOutput::onStopPlayback()
         activeCallback_(false);
     }
     OPENAUTO_LOG(info) << "[GSTVideoOutput] stop.";
-    gst_element_set_state(vid_pipeline, GST_STATE_PAUSED);
+    gst_element_set_state(vidPipeline_, GST_STATE_PAUSED);
     videoWidget_->hide();
 }
 
