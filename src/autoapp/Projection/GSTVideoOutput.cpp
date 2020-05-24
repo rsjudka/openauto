@@ -31,8 +31,6 @@ namespace autoapp
 namespace projection
 {
 
-
-
 GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configuration, QWidget* videoContainer, std::function<void(bool)> activeCallback)
     : VideoOutput(std::move(configuration))
     , videoContainer_(videoContainer)
@@ -107,7 +105,7 @@ gboolean GSTVideoOutput::bus_callback(GstBus */* unused*/, GstMessage *message, 
     GError *err;
     gchar *name;
 
-    switch (GST_MESSAGE_TYPE(message))
+    switch(GST_MESSAGE_TYPE(message))
     {
     case GST_MESSAGE_ERROR:
         gst_message_parse_error(message, &err, &debug);
@@ -115,7 +113,6 @@ gboolean GSTVideoOutput::bus_callback(GstBus */* unused*/, GstMessage *message, 
         g_error_free(err);
         g_free(debug);
         break;
-
     case GST_MESSAGE_WARNING:
         gst_message_parse_warning(message, &err, &debug);
         OPENAUTO_LOG(info) << "[GSTVideoOutput] Warning " << err->message<<" | Debug " << debug;
@@ -124,14 +121,11 @@ gboolean GSTVideoOutput::bus_callback(GstBus */* unused*/, GstMessage *message, 
         g_error_free(err);
         g_free(debug);
         break;
-
     case GST_MESSAGE_EOS:
         OPENAUTO_LOG(info) << "[GSTVideoOutput] End of stream";
         break;
-
     case GST_MESSAGE_STATE_CHANGED:
         break;
-
     default:
         break;
     }
@@ -171,7 +165,6 @@ GstPadProbeReturn GSTVideoOutput::convert_probe(GstPad *pad, GstPadProbeInfo *in
 
 bool GSTVideoOutput::init()
 {
-
     OPENAUTO_LOG(info) << "[GSTVideoOutput] init";
     emit startPlayback();
     return true;

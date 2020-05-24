@@ -1,4 +1,3 @@
-
 cmake_minimum_required(VERSION 3.5.1)
 project(openauto CXX)
 
@@ -9,7 +8,7 @@ set(base_directory ${CMAKE_CURRENT_SOURCE_DIR})
 set(resources_directory ${base_directory}/assets)
 set(sources_directory ${base_directory}/src)
 set(include_directory ${base_directory}/include)
-include( ${base_directory}/cmake_modules/functions.cmake )
+include(${base_directory}/cmake_modules/functions.cmake)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${base_directory}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${base_directory}/lib)
@@ -56,16 +55,14 @@ if(GST_BUILD)
     gstreamer-app-1.0>=1.4)
     add_definitions(-DUSE_GST)
     if(RPI_BUILD)
-     add_definitions(-DRPI)
-     findRpiRevision( RPI_REVISION )
-     if(RPI_REVISION MATCHES "a03111" OR RPI_REVISION MATCHES "b03111" OR RPI_REVISION MATCHES "a03111")
-      message("Raspberry Pi 4 Found")
-      add_definitions(-DPI4)
-     endif(RPI_REVISION MATCHES "a03111" OR RPI_REVISION MATCHES "b03111" OR RPI_REVISION MATCHES "a03111")
-    endif(RPI_BUILD)
+        add_definitions(-DRPI)
+        findRpiRevision( RPI_REVISION )
+        if(RPI_REVISION MATCHES "a03111" OR RPI_REVISION MATCHES "b03111" OR RPI_REVISION MATCHES "a03111")
+            message("Raspberry Pi 4 Found")
+            add_definitions(-DPI4)
+        endif(RPI_REVISION MATCHES "a03111" OR RPI_REVISION MATCHES "b03111" OR RPI_REVISION MATCHES "a03111")
+        endif(RPI_BUILD)
 endif(GST_BUILD)
-
-
 
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}
@@ -83,8 +80,9 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}
                     ${AASDK_INCLUDE_DIRS}
                     ${BCM_HOST_INCLUDE_DIRS}
                     ${ILCLIENT_INCLUDE_DIRS}
+ 		            ${GST_INCLUDE_DIRS})
                     ${include_directory}
- 		    ${GST_INCLUDE_DIRS})
+
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
 set(common_include_directory ${include_directory}/f1x/openauto/Common)
@@ -101,7 +99,6 @@ add_library(auto SHARED ${autoapp_lib_source_files} ${autoapp_lib_inlcude_files}
 message(STATUS "${GST_LIBRARIES}")
 target_link_libraries(autoapp
                         ${GST_LIBRARIES}
-
                         ${Boost_LIBRARIES}
                         ${Qt5Multimedia_LIBRARIES}
                         ${Qt5MultimediaWidgets_LIBRARIES}
@@ -123,9 +120,7 @@ target_link_libraries(autoapp
                         ${QTGSTREAMER_UI_LIBRARIES}
                         ${QTGSTREAMER_QUICK_LIBRARIES}
                         ${QTGSTREAMER_QUICK_LIBRARY}
-                        ${GOBJECT_LIBRARIES}
-)
-
+                        ${GOBJECT_LIBRARIES})
 
 set(btservice_sources_directory ${sources_directory}/btservice)
 set(btservice_include_directory ${include_directory}/f1x/openauto/btservice)

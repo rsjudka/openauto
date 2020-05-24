@@ -64,7 +64,6 @@ ServiceFactory::ServiceFactory(boost::asio::io_service& ioService, configuration
     , nightMode_(nightMode)
 {
 
-
 }
 
 ServiceList ServiceFactory::create(aasdk::messenger::IMessenger::Pointer messenger)
