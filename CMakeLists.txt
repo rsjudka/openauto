@@ -64,7 +64,6 @@ if(GST_BUILD)
         endif(RPI_BUILD)
 endif(GST_BUILD)
 
-
 include_directories(${CMAKE_CURRENT_BINARY_DIR}
                     ${Qt5Multimedia_INCLUDE_DIRS}
                     ${Qt5MultimediaWidgets_INCLUDE_DIRS}
@@ -80,7 +79,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}
                     ${AASDK_INCLUDE_DIRS}
                     ${BCM_HOST_INCLUDE_DIRS}
                     ${ILCLIENT_INCLUDE_DIRS}
- 		            ${GST_INCLUDE_DIRS})
+                    ${GST_INCLUDE_DIRS})
                     ${include_directory}
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
@@ -134,4 +133,3 @@ target_link_libraries(btservice
                         ${Qt5MultimediaWidgets_LIBRARIES}
                         ${PROTOBUF_LIBRARIES}
                         ${AASDK_PROTO_LIBRARIES})
-
