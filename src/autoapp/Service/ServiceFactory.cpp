@@ -60,6 +60,8 @@ ServiceFactory::ServiceFactory(boost::asio::io_service& ioService, configuration
     , omxVideoOutput_(std::make_shared<projection::OMXVideoOutput>(configuration_, this->QRectToDestRect(screenGeometry_), activeCallback_))
 #elif defined USE_GST
     , gstVideoOutput_((QGst::init(nullptr, nullptr), std::make_shared<projection::GSTVideoOutput>(configuration_, activeArea_, activeCallback_)))
+#else
+    , qtVideoOutput_(nullptr)
 #endif
     , nightMode_(nightMode)
 {
@@ -95,7 +97,11 @@ IService::Pointer ServiceFactory::createVideoService(aasdk::messenger::IMessenge
     qtVideoOutput_ = new projection::QtVideoOutput(configuration_, activeArea_);
     if (activeCallback_ != nullptr) {
         QObject::connect(qtVideoOutput_, &projection::QtVideoOutput::startPlayback, [callback = activeCallback_]() { callback(true); });
-        QObject::connect(qtVideoOutput_, &projection::QtVideoOutput::stopPlayback, [callback = activeCallback_]() { callback(false); });
+        QObject::connect(qtVideoOutput_, &projection::QtVideoOutput::stopPlayback, [this]() {
+            activeCallback_(false);
+            qtVideoOutput_->disconnect();
+            qtVideoOutput_ = nullptr;
+        });
     }
     projection::IVideoOutput::Pointer videoOutput(qtVideoOutput_, std::bind(&QObject::deleteLater, std::placeholders::_1));
 #endif
