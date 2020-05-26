@@ -79,8 +79,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}
                     ${AASDK_INCLUDE_DIRS}
                     ${BCM_HOST_INCLUDE_DIRS}
                     ${ILCLIENT_INCLUDE_DIRS}
-                    ${GST_INCLUDE_DIRS})
-                    ${include_directory}
+                    ${GST_INCLUDE_DIRS}
+                    ${include_directory})
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 

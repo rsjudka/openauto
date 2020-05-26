@@ -45,9 +45,9 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
     videoWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView); 
 
     videoSink_ = surface_->videoSink();
-    GstBus *bus;
+    GstBus* bus;
 
-    GError *error = NULL;
+    GError* error = NULL;
     const char* vidLaunchStr = "appsrc name=mysrc is-live=true block=false max-latency=100 do-timestamp=true stream-type=stream !  "
                                  "queue ! "
                                  
@@ -76,12 +76,12 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
     gst_bus_add_watch(bus, (GstBusFunc)GSTVideoOutput::bus_callback, this);
     gst_object_unref(bus);
 
-    GstElement *sink = QGlib::RefPointer<QGst::Element>(videoSink_);
+    GstElement* sink = QGlib::RefPointer<QGst::Element>(videoSink_);
     g_object_set (sink, "force-aspect-ratio", false, nullptr);
 
     g_object_set (sink, "sync", false, nullptr);
     g_object_set (sink, "async", false, nullptr);
-    GstElement *capsFilter = gst_bin_get_by_name(GST_BIN(vidPipeline_), "mycapsfilter");
+    GstElement* capsFilter = gst_bin_get_by_name(GST_BIN(vidPipeline_), "mycapsfilter");
     gst_bin_add(GST_BIN(vidPipeline_), GST_ELEMENT(sink));
     gst_element_link(capsFilter, GST_ELEMENT(sink));
 
@@ -99,11 +99,11 @@ GSTVideoOutput::~GSTVideoOutput()
     gst_object_unref(vidSrc_);
 }
 
-gboolean GSTVideoOutput::bus_callback(GstBus */* unused*/, GstMessage *message, gpointer *ptr)
+gboolean GSTVideoOutput::bus_callback(GstBus* /* unused*/, GstMessage* message, gpointer* ptr)
 {
-    gchar *debug;
-    GError *err;
-    gchar *name;
+    gchar* debug;
+    GError* err;
+    gchar* name;
 
     switch(GST_MESSAGE_TYPE(message))
     {
@@ -116,7 +116,7 @@ gboolean GSTVideoOutput::bus_callback(GstBus */* unused*/, GstMessage *message, 
     case GST_MESSAGE_WARNING:
         gst_message_parse_warning(message, &err, &debug);
         OPENAUTO_LOG(info) << "[GSTVideoOutput] Warning " << err->message<<" | Debug " << debug;
-        name = (gchar *)GST_MESSAGE_SRC_NAME(message);
+        name = (gchar*)GST_MESSAGE_SRC_NAME(message);
         OPENAUTO_LOG(info) << "[GSTVideoOutput] Name of src " << name ? name : "nil";
         g_error_free(err);
         g_free(debug);
@@ -135,22 +135,22 @@ gboolean GSTVideoOutput::bus_callback(GstBus */* unused*/, GstMessage *message, 
 
 bool GSTVideoOutput::open()
 {
-     GstElement *capsFilter = gst_bin_get_by_name(GST_BIN(vidPipeline_), "mycapsfilter");
-    GstPad *convertPad = gst_element_get_static_pad(capsFilter, "sink");
+     GstElement* capsFilter = gst_bin_get_by_name(GST_BIN(vidPipeline_), "mycapsfilter");
+    GstPad* convertPad = gst_element_get_static_pad(capsFilter, "sink");
     gst_pad_add_probe (convertPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, convert_probe, this, NULL);
     gst_element_set_state(vidPipeline_, GST_STATE_PLAYING);
     return true;
 }
 
-GstPadProbeReturn GSTVideoOutput::convert_probe(GstPad *pad, GstPadProbeInfo *info, void *user_data)
+GstPadProbeReturn GSTVideoOutput::convert_probe(GstPad* pad, GstPadProbeInfo* info, void* user_data)
 {
-    GstEvent *event = GST_PAD_PROBE_INFO_EVENT(info);
+    GstEvent* event = GST_PAD_PROBE_INFO_EVENT(info);
     if(GST_PAD_PROBE_INFO_TYPE(info) & GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM) {
         if(GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT) {
-            GstCaps *caps  = gst_pad_get_current_caps(pad);
+            GstCaps* caps  = gst_pad_get_current_caps(pad);
             if(caps != NULL)
             {
-                GstVideoInfo *vinfo = gst_video_info_new();
+                GstVideoInfo* vinfo = gst_video_info_new();
                 gst_video_info_from_caps(vinfo, caps);
                 OPENAUTO_LOG(info) << "[GSTVideoOutput] Video Width: "<< vinfo->width;
                 OPENAUTO_LOG(info) << "[GSTVideoOutput] Video Height: "<< vinfo->height;
@@ -174,7 +174,7 @@ void GSTVideoOutput::write(uint64_t timestamp, const aasdk::common::DataConstBuf
 {
     GstBuffer* buffer_ = gst_buffer_new_and_alloc(buffer.size);
     gst_buffer_fill(buffer_, 0, buffer.cdata, buffer.size);
-    int ret = gst_app_src_push_buffer((GstAppSrc *)vidSrc_, buffer_);
+    int ret = gst_app_src_push_buffer((GstAppSrc*)vidSrc_, buffer_);
     if(ret != GST_FLOW_OK)
     {
         OPENAUTO_LOG(info) << "[GSTVideoOutput] push buffer returned " << ret << " for " << buffer.size << "bytes";

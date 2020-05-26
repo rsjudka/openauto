@@ -72,15 +72,15 @@ protected slots:
     void onStartPlayback();
     void onStopPlayback();
 private:
-    static GstPadProbeReturn convert_probe(GstPad *pad, GstPadProbeInfo *info, void *user_data);
-    static gboolean bus_callback(GstBus *bus, GstMessage *message, gpointer *ptr);
+    static GstPadProbeReturn convert_probe(GstPad* pad, GstPadProbeInfo* info, void* user_data);
+    static gboolean bus_callback(GstBus* bus, GstMessage* message, gpointer* ptr);
 
     QGst::ElementPtr videoSink_;
     QQuickWidget* videoWidget_;
-    GstElement *vidPipeline_ = nullptr;
-    GstAppSrc *vidSrc_ = nullptr;
+    GstElement* vidPipeline_ = nullptr;
+    GstAppSrc* vidSrc_ = nullptr;
     QWidget* videoContainer_;
-    QGst::Quick::VideoSurface *surface_;
+    QGst::Quick::VideoSurface* surface_;
     std::function<void(bool)> activeCallback_;
 };
 
