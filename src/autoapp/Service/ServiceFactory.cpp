@@ -31,6 +31,7 @@
 #include <f1x/openauto/autoapp/Service/BluetoothService.hpp>
 #include <f1x/openauto/autoapp/Service/InputService.hpp>
 #include <f1x/openauto/autoapp/Projection/QtVideoOutput.hpp>
+#include <f1x/openauto/autoapp/Projection/GSTVideoOutput.hpp>
 #include <f1x/openauto/autoapp/Projection/OMXVideoOutput.hpp>
 #include <f1x/openauto/autoapp/Projection/RtAudioOutput.hpp>
 #include <f1x/openauto/autoapp/Projection/QtAudioOutput.hpp>
@@ -55,8 +56,10 @@ ServiceFactory::ServiceFactory(boost::asio::io_service& ioService, configuration
     , activeArea_(activeArea)
     , screenGeometry_(this->mapActiveAreaToGlobal(activeArea_))
     , activeCallback_(activeCallback)
-#ifdef USE_OMX
+#if defined USE_OMX
     , omxVideoOutput_(std::make_shared<projection::OMXVideoOutput>(configuration_, this->QRectToDestRect(screenGeometry_), activeCallback_))
+#elif defined USE_GST
+    , gstVideoOutput_((QGst::init(nullptr, nullptr), std::make_shared<projection::GSTVideoOutput>(configuration_, activeArea_, activeCallback_)))
 #else
     , qtVideoOutput_(nullptr)
 #endif
@@ -86,8 +89,10 @@ ServiceList ServiceFactory::create(aasdk::messenger::IMessenger::Pointer messeng
 
 IService::Pointer ServiceFactory::createVideoService(aasdk::messenger::IMessenger::Pointer messenger)
 {
-#ifdef USE_OMX
+#if defined USE_OMX
     auto videoOutput(omxVideoOutput_);
+#elif defined USE_GST
+    auto videoOutput(gstVideoOutput_);
 #else
     qtVideoOutput_ = new projection::QtVideoOutput(configuration_, activeArea_);
     if(activeCallback_ != nullptr)
@@ -193,10 +198,15 @@ void ServiceFactory::resize()
     {
         inputDevice_->setTouchscreenGeometry(screenGeometry_);
     }
-#ifdef USE_OMX
+#if defined USE_OMX
     if(omxVideoOutput_ != nullptr)
     {
         omxVideoOutput_->setDestRect(this->QRectToDestRect(screenGeometry_));
+    }
+#elif defined USE_GST
+    if(gstVideoOutput_ != nullptr)
+    {
+        gstVideoOutput_->resize();
     }
 #else
     if(qtVideoOutput_ != nullptr)
