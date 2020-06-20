@@ -90,7 +90,8 @@ IService::Pointer ServiceFactory::createVideoService(aasdk::messenger::IMessenge
     auto videoOutput(omxVideoOutput_);
 #else
     qtVideoOutput_ = new projection::QtVideoOutput(configuration_, activeArea_);
-    if (activeCallback_ != nullptr) {
+    if(activeCallback_ != nullptr)
+    {
         QObject::connect(qtVideoOutput_, &projection::QtVideoOutput::startPlayback, [callback = activeCallback_]() { callback(true); });
         QObject::connect(qtVideoOutput_, &projection::QtVideoOutput::stopPlayback, [this]() {
             activeCallback_(false);
@@ -178,18 +179,30 @@ void ServiceFactory::createAudioServices(ServiceList& serviceList, aasdk::messen
 void ServiceFactory::setOpacity(unsigned int alpha)
 {
 #ifdef USE_OMX
-    if (omxVideoOutput_ != nullptr) omxVideoOutput_->setOpacity(alpha);
+    if(omxVideoOutput_ != nullptr)
+    {
+        omxVideoOutput_->setOpacity(alpha);
+    }
 #endif
 }
 
 void ServiceFactory::resize()
 {
     screenGeometry_ = this->mapActiveAreaToGlobal(activeArea_);
-    if (inputDevice_ != nullptr) inputDevice_->setTouchscreenGeometry(screenGeometry_);
+    if(inputDevice_ != nullptr)
+    {
+        inputDevice_->setTouchscreenGeometry(screenGeometry_);
+    }
 #ifdef USE_OMX
-    if (omxVideoOutput_ != nullptr) omxVideoOutput_->setDestRect(this->QRectToDestRect(screenGeometry_));
+    if(omxVideoOutput_ != nullptr)
+    {
+        omxVideoOutput_->setDestRect(this->QRectToDestRect(screenGeometry_));
+    }
 #else
-    if (qtVideoOutput_ != nullptr) qtVideoOutput_->resize();
+    if(qtVideoOutput_ != nullptr)
+    {
+        qtVideoOutput_->resize();
+    }
 #endif
 }
 
@@ -199,9 +212,17 @@ void ServiceFactory::setNightMode(bool nightMode)
     if (std::shared_ptr<SensorService> sensorService = sensorService_.lock()) sensorService->setNightMode(nightMode_);
 }
 
+void ServiceFactory::sendKeyEvent(QKeyEvent* event)
+{
+    if(inputDevice_ != nullptr)
+    {
+        inputDevice_->eventFilter(activeArea_, event);
+    }
+}
+
 QRect ServiceFactory::mapActiveAreaToGlobal(QWidget* activeArea)
 {
-    if (activeArea == nullptr)
+    if(activeArea == nullptr)
     {
         QScreen* screen = QGuiApplication::primaryScreen();
         return screen == nullptr ? QRect(0, 0, 1, 1) : screen->geometry();

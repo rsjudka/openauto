@@ -42,6 +42,7 @@ public:
     void setOpacity(unsigned int alpha);
     void resize();
     void setNightMode(bool nightMode);
+    void sendKeyEvent(QKeyEvent* event);
     static QRect mapActiveAreaToGlobal(QWidget* activeArea);
 #ifdef USE_OMX
     static projection::DestRect QRectToDestRect(QRect rect);
