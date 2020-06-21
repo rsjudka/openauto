@@ -219,7 +219,10 @@ void ServiceFactory::resize()
 void ServiceFactory::setNightMode(bool nightMode)
 {
     nightMode_ = nightMode;
-    if (std::shared_ptr<SensorService> sensorService = sensorService_.lock()) sensorService->setNightMode(nightMode_);
+    if(std::shared_ptr<SensorService> sensorService = sensorService_.lock())
+    {
+        sensorService->setNightMode(nightMode_);
+    }
 }
 
 void ServiceFactory::sendKeyEvent(QKeyEvent* event)
