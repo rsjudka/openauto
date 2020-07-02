@@ -55,6 +55,7 @@ public:
     void onHandshake(const aasdk::common::DataConstBuffer& payload) override;
     void onServiceDiscoveryRequest(const aasdk::proto::messages::ServiceDiscoveryRequest& request) override;
     void onAudioFocusRequest(const aasdk::proto::messages::AudioFocusRequest& request) override;
+    void onVoiceSessionRequest(const aasdk::proto::messages::VoiceSessionRequest& request) override;
     void onShutdownRequest(const aasdk::proto::messages::ShutdownRequest& request) override;
     void onShutdownResponse(const aasdk::proto::messages::ShutdownResponse& response) override;
     void onNavigationFocusRequest(const aasdk::proto::messages::NavigationFocusRequest& request) override;
