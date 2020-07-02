@@ -144,7 +144,7 @@ bool OMXVideoOutput::setupDisplayRegion()
     displayRegion.noaspect = OMX_TRUE;
     displayRegion.set = static_cast<OMX_DISPLAYSETTYPE >(OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT | OMX_DISPLAY_SET_LAYER);    
 
-    if (destRect_.fullscreen == OMX_FALSE)
+    if(displayRegion.fullscreen == OMX_FALSE)
     {
         displayRegion.alpha = alpha_;
         displayRegion.dest_rect.x_offset = destRect_.xOffset;

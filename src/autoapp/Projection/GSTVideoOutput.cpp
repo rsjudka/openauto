@@ -45,42 +45,38 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
     videoWidget_->setResizeMode(QQuickWidget::SizeRootObjectToView); 
 
     videoSink_ = surface_->videoSink();
-    GstBus* bus;
 
-    GError* error = NULL;
-    const char* vidLaunchStr = "appsrc name=mysrc is-live=true block=false max-latency=100 do-timestamp=true stream-type=stream !  "
-                                 "queue ! "
-                                 
-                                 "h264parse ! "
+    GError* error = nullptr;
+    const char* vidLaunchStr = "appsrc name=mysrc is-live=true block=false max-latency=100 do-timestamp=true stream-type=stream ! queue ! h264parse ! "
         #ifdef RPI
             #ifdef PI4
-                                 " v4l2h264dec !"
+                               "v4l2h264dec ! "
             #else
-                                 " omxh264dec ! "
+                               "omxh264dec ! "
             #endif
         #else
-                                 "avdec_h264 ! "
+                               "avdec_h264 ! "
         #endif
-                                 "capsfilter caps=video/x-raw name=mycapsfilter";
+                               "capsfilter caps=video/x-raw name=mycapsfilter";
     #ifdef RPI
         OPENAUTO_LOG(info) << "[GSTVideoOutput] RPI Build, running with " <<
         #ifdef PI4
-        "v4l2h264dec";
+                              "v4l2h264dec";
         #else
-        "omxh264dec";
+                              "omxh264dec";
         #endif
     #endif
     
     vidPipeline_ = gst_parse_launch(vidLaunchStr, &error);
-    bus = gst_pipeline_get_bus(GST_PIPELINE(vidPipeline_));
-    gst_bus_add_watch(bus, (GstBusFunc)GSTVideoOutput::bus_callback, this);
+    GstBus* bus = gst_pipeline_get_bus(GST_PIPELINE(vidPipeline_));
+    gst_bus_add_watch(bus, (GstBusFunc)&GSTVideoOutput::busCallback, this);
     gst_object_unref(bus);
 
     GstElement* sink = QGlib::RefPointer<QGst::Element>(videoSink_);
-    g_object_set (sink, "force-aspect-ratio", false, nullptr);
+    g_object_set(sink, "force-aspect-ratio", false, nullptr);
+    g_object_set(sink, "sync", false, nullptr);
+    g_object_set(sink, "async", false, nullptr);
 
-    g_object_set (sink, "sync", false, nullptr);
-    g_object_set (sink, "async", false, nullptr);
     GstElement* capsFilter = gst_bin_get_by_name(GST_BIN(vidPipeline_), "mycapsfilter");
     gst_bin_add(GST_BIN(vidPipeline_), GST_ELEMENT(sink));
     gst_element_link(capsFilter, GST_ELEMENT(sink));
@@ -92,14 +88,13 @@ GSTVideoOutput::GSTVideoOutput(configuration::IConfiguration::Pointer configurat
     connect(this, &GSTVideoOutput::stopPlayback, this, &GSTVideoOutput::onStopPlayback, Qt::QueuedConnection);
 }
 
-
 GSTVideoOutput::~GSTVideoOutput()
 {
     gst_object_unref(vidPipeline_);
     gst_object_unref(vidSrc_);
 }
 
-gboolean GSTVideoOutput::bus_callback(GstBus* /* unused*/, GstMessage* message, gpointer* ptr)
+gboolean GSTVideoOutput::busCallback(GstBus*, GstMessage* message, gpointer*)
 {
     gchar* debug;
     GError* err;
@@ -115,9 +110,9 @@ gboolean GSTVideoOutput::bus_callback(GstBus* /* unused*/, GstMessage* message, 
         break;
     case GST_MESSAGE_WARNING:
         gst_message_parse_warning(message, &err, &debug);
-        OPENAUTO_LOG(info) << "[GSTVideoOutput] Warning " << err->message<<" | Debug " << debug;
+        OPENAUTO_LOG(info) << "[GSTVideoOutput] Warning " << err->message << " | Debug " << debug;
         name = (gchar*)GST_MESSAGE_SRC_NAME(message);
-        OPENAUTO_LOG(info) << "[GSTVideoOutput] Name of src " << name ? name : "nil";
+        OPENAUTO_LOG(info) << "[GSTVideoOutput] Name of src " << (name ? name : "nil");
         g_error_free(err);
         g_free(debug);
         break;
@@ -125,7 +120,6 @@ gboolean GSTVideoOutput::bus_callback(GstBus* /* unused*/, GstMessage* message, 
         OPENAUTO_LOG(info) << "[GSTVideoOutput] End of stream";
         break;
     case GST_MESSAGE_STATE_CHANGED:
-        break;
     default:
         break;
     }
@@ -135,31 +129,34 @@ gboolean GSTVideoOutput::bus_callback(GstBus* /* unused*/, GstMessage* message, 
 
 bool GSTVideoOutput::open()
 {
-     GstElement* capsFilter = gst_bin_get_by_name(GST_BIN(vidPipeline_), "mycapsfilter");
+    GstElement* capsFilter = gst_bin_get_by_name(GST_BIN(vidPipeline_), "mycapsfilter");
     GstPad* convertPad = gst_element_get_static_pad(capsFilter, "sink");
-    gst_pad_add_probe (convertPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, convert_probe, this, NULL);
+    gst_pad_add_probe(convertPad, GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM, &GSTVideoOutput::convertProbe, this, nullptr);
     gst_element_set_state(vidPipeline_, GST_STATE_PLAYING);
+
     return true;
 }
 
-GstPadProbeReturn GSTVideoOutput::convert_probe(GstPad* pad, GstPadProbeInfo* info, void* user_data)
+GstPadProbeReturn GSTVideoOutput::convertProbe(GstPad* pad, GstPadProbeInfo* info, void*)
 {
     GstEvent* event = GST_PAD_PROBE_INFO_EVENT(info);
-    if(GST_PAD_PROBE_INFO_TYPE(info) & GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM) {
-        if(GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT) {
+    if(GST_PAD_PROBE_INFO_TYPE(info) & GST_PAD_PROBE_TYPE_EVENT_DOWNSTREAM)
+    {
+        if(GST_EVENT_TYPE(event) == GST_EVENT_SEGMENT)
+        {
             GstCaps* caps  = gst_pad_get_current_caps(pad);
-            if(caps != NULL)
+            if(caps != nullptr)
             {
                 GstVideoInfo* vinfo = gst_video_info_new();
                 gst_video_info_from_caps(vinfo, caps);
-                OPENAUTO_LOG(info) << "[GSTVideoOutput] Video Width: "<< vinfo->width;
-                OPENAUTO_LOG(info) << "[GSTVideoOutput] Video Height: "<< vinfo->height;
-
-
+                OPENAUTO_LOG(info) << "[GSTVideoOutput] Video Width: " << vinfo->width;
+                OPENAUTO_LOG(info) << "[GSTVideoOutput] Video Height: " << vinfo->height;
             }
+
             return GST_PAD_PROBE_REMOVE;
         }
     }
+
     return GST_PAD_PROBE_OK;
 }
 
@@ -167,6 +164,7 @@ bool GSTVideoOutput::init()
 {
     OPENAUTO_LOG(info) << "[GSTVideoOutput] init";
     emit startPlayback();
+
     return true;
 }
 
@@ -187,6 +185,7 @@ void GSTVideoOutput::onStartPlayback()
     {
         activeCallback_(true);
     }
+
     if(videoContainer_ == nullptr)
     {
         OPENAUTO_LOG(info) << "[GSTVideoOutput] No video container, setting projection fullscreen";
@@ -213,6 +212,7 @@ void GSTVideoOutput::onStopPlayback()
     {
         activeCallback_(false);
     }
+
     OPENAUTO_LOG(info) << "[GSTVideoOutput] stop.";
     gst_element_set_state(vidPipeline_, GST_STATE_PAUSED);
     videoWidget_->hide();
@@ -222,7 +222,10 @@ void GSTVideoOutput::resize()
 {
     OPENAUTO_LOG(info) << "[GSTVideoOutput] Got resize request to "<< videoContainer_->width() << "x" << videoContainer_->height();
 
-    if(videoWidget_ != nullptr && videoContainer_ != nullptr) videoWidget_->resize(videoContainer_->size());
+    if(videoWidget_ != nullptr && videoContainer_ != nullptr)
+    {
+        videoWidget_->resize(videoContainer_->size());
+    }
 }
 
 }

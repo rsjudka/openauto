@@ -35,6 +35,7 @@ find_package(Protobuf REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(rtaudio REQUIRED)
 find_package(GObject)
+
 if(WIN32)
     set(WINSOCK2_LIBRARIES "ws2_32")
 endif(WIN32)
@@ -49,10 +50,11 @@ endif(RPI_BUILD AND NOT GST_BUILD)
 if(GST_BUILD)
     find_package(Qt5GStreamer)
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4
-    gstreamer-sdp-1.0>=1.4
-    gstreamer-video-1.0>=1.4
-    gstreamer-app-1.0>=1.4)
+    pkg_check_modules(GST REQUIRED
+                      gstreamer-1.0>=1.4
+                      gstreamer-sdp-1.0>=1.4
+                      gstreamer-video-1.0>=1.4
+                      gstreamer-app-1.0>=1.4)
     add_definitions(-DUSE_GST)
     if(RPI_BUILD)
         add_definitions(-DRPI)
@@ -61,7 +63,7 @@ if(GST_BUILD)
             message("Raspberry Pi 4 Found")
             add_definitions(-DPI4)
         endif(RPI_REVISION MATCHES "a03111" OR RPI_REVISION MATCHES "b03111" OR RPI_REVISION MATCHES "a03111")
-        endif(RPI_BUILD)
+    endif(RPI_BUILD)
 endif(GST_BUILD)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}
@@ -96,6 +98,7 @@ file(GLOB_RECURSE autoapp_lib_source_files ${autoapp_sources_directory}/App.cpp 
 file(GLOB_RECURSE autoapp_lib_inlcude_files ${autoapp_include_directory}/App.hpp ${autoapp_include_directory}/Configuration/*.hpp ${autoapp_include_directory}/Projection/*.hpp ${autoapp_include_directory}/Service/*.hpp)
 add_library(auto SHARED ${autoapp_lib_source_files} ${autoapp_lib_inlcude_files})
 message(STATUS "${GST_LIBRARIES}")
+
 target_link_libraries(autoapp
                         ${GST_LIBRARIES}
                         ${Boost_LIBRARIES}

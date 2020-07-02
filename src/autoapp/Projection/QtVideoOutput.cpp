@@ -71,12 +71,15 @@ void QtVideoOutput::write(uint64_t, const aasdk::common::DataConstBuffer& buffer
 
 void QtVideoOutput::resize()
 {
-    if (videoWidget_ != nullptr && videoContainer_ != nullptr) videoWidget_->resize(videoContainer_->size());
+    if(videoWidget_ != nullptr && videoContainer_ != nullptr)
+    {
+        videoWidget_->resize(videoContainer_->size());
+    }
 }
 
 void QtVideoOutput::onStartPlayback()
 {
-    if (videoContainer_ == nullptr)
+    if(videoContainer_ == nullptr)
     {
         videoWidget_->setAspectRatioMode(Qt::IgnoreAspectRatio);
         videoWidget_->setFocus();
