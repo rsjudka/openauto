@@ -229,13 +229,19 @@ void AndroidAutoEntity::onNavigationFocusRequest(const aasdk::proto::messages::N
 
 void AndroidAutoEntity::onVoiceSessionRequest(const aasdk::proto::messages::VoiceSessionRequest& request)
 {
-    OPENAUTO_LOG(info) << "[AndroidAutoEntity] Voice session request, type: " << request.type();
-
-    aasdk::proto::messages::VoiceSessionResponse response;
+    // OPENAUTO_LOG(info) << "[AndroidAutoEntity] Voice session request, type: " << request.type();
+    if(request.type() == 1){
+        OPENAUTO_LOG(info) << "[AndroidAutoEntity] Voice session request: START";
+    }
+    else if(request.type() == 2){
+        OPENAUTO_LOG(info) << "[AndroidAutoEntity] Voice session request: STOP";
+    }
+    else{
+        OPENAUTO_LOG(info) << "[AndroidAutoEntity] Voice session request: UNKNOWN TYPE: "<<request.type();
+    }
 
     auto promise = aasdk::channel::SendPromise::defer(strand_);
     promise->then([]() {}, std::bind(&AndroidAutoEntity::onChannelError, this->shared_from_this(), std::placeholders::_1));
-    controlServiceChannel_->sendVoiceSessionResponse(response, std::move(promise));
     controlServiceChannel_->receive(this->shared_from_this());
 }
 

@@ -48,7 +48,12 @@ public:
     void onAVChannelStopIndication(const aasdk::proto::messages::AVChannelStopIndication& indication) override;
     void onAVMediaWithTimestampIndication(aasdk::messenger::Timestamp::ValueType timestamp, const aasdk::common::DataConstBuffer& buffer) override;
     void onAVMediaIndication(const aasdk::common::DataConstBuffer& buffer) override;
+    void onChannelErrorSetupRequest(const aasdk::error::Error& e) ;
+    void onChannelErrorOpenRequest(const aasdk::error::Error& e) ;
+
+    void onChannelErrorTimestamp(const aasdk::error::Error& e) ;
     void onChannelError(const aasdk::error::Error& e) override;
+
 
 protected:
     using std::enable_shared_from_this<AudioService>::shared_from_this;

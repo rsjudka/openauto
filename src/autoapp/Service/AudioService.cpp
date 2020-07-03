@@ -107,7 +107,7 @@ void AudioService::onChannelOpenRequest(const aasdk::proto::messages::ChannelOpe
     response.set_status(status);
 
     auto promise = aasdk::channel::SendPromise::defer(strand_);
-    promise->then([]() {}, std::bind(&AudioService::onChannelError, this->shared_from_this(), std::placeholders::_1));
+    promise->then([]() {}, std::bind(&AudioService::onChannelErrorOpenRequest, this->shared_from_this(), std::placeholders::_1));
     channel_->sendChannelOpenResponse(response, std::move(promise));
     channel_->receive(this->shared_from_this());
 }
@@ -127,7 +127,7 @@ void AudioService::onAVChannelSetupRequest(const aasdk::proto::messages::AVChann
     response.add_configs(0);
 
     auto promise = aasdk::channel::SendPromise::defer(strand_);
-    promise->then([]() {}, std::bind(&AudioService::onChannelError, this->shared_from_this(), std::placeholders::_1));
+    promise->then([]() {}, std::bind(&AudioService::onChannelErrorSetupRequest, this->shared_from_this(), std::placeholders::_1));
     channel_->sendAVChannelSetupResponse(response, std::move(promise));
     channel_->receive(this->shared_from_this());
 }
@@ -160,7 +160,7 @@ void AudioService::onAVMediaWithTimestampIndication(aasdk::messenger::Timestamp:
     indication.set_value(1);
 
     auto promise = aasdk::channel::SendPromise::defer(strand_);
-    promise->then([]() {}, std::bind(&AudioService::onChannelError, this->shared_from_this(), std::placeholders::_1));
+    promise->then([]() {}, std::bind(&AudioService::onChannelErrorTimestamp, this->shared_from_this(), std::placeholders::_1));
     channel_->sendAVMediaAckIndication(indication, std::move(promise));
     channel_->receive(this->shared_from_this());
 }
@@ -170,12 +170,27 @@ void AudioService::onAVMediaIndication(const aasdk::common::DataConstBuffer& buf
     this->onAVMediaWithTimestampIndication(0, buffer);
 }
 
+void AudioService::onChannelErrorOpenRequest(const aasdk::error::Error& e)
+{
+    OPENAUTO_LOG(error) << "[AudioService] Open channel error: " << e.what()
+                        << ", channel: " << aasdk::messenger::channelIdToString(channel_->getId());
+}
+void AudioService::onChannelErrorSetupRequest(const aasdk::error::Error& e)
+{
+    OPENAUTO_LOG(error) << "[AudioService] Setup channel error: " << e.what()
+                        << ", channel: " << aasdk::messenger::channelIdToString(channel_->getId());
+}
+void AudioService::onChannelErrorTimestamp(const aasdk::error::Error& e)
+{
+    OPENAUTO_LOG(error) << "[AudioService] Timestamp channel error: " << e.what()
+                        << ", channel: " << aasdk::messenger::channelIdToString(channel_->getId());
+}
+
 void AudioService::onChannelError(const aasdk::error::Error& e)
 {
     OPENAUTO_LOG(error) << "[AudioService] channel error: " << e.what()
                         << ", channel: " << aasdk::messenger::channelIdToString(channel_->getId());
 }
-
 }
 }
 }
