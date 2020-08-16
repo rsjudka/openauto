@@ -25,9 +25,15 @@ namespace btservice = openauto::btservice;
 
 int main(int argc, char* argv[])
 {
+    QBluetoothAddress address;
     QApplication qApplication(argc, argv);
+    auto adapters = QBluetoothLocalDevice::allDevices();
+    if (adapters.size() > 0)
+        address =adapters.at(0).address();
 
-    const QBluetoothAddress address = QBluetoothAddress();
+    OPENAUTO_LOG(error) << "[btservice] No adapter found";
+
+
     const uint16_t portNumber = 22;
 
     btservice::AndroidBluetoothServer androidBluetoothServer;

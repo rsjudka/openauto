@@ -4,11 +4,11 @@
 #include <memory>
 #include <sstream>
 #include <QBluetoothServer>
+#include <QBluetoothLocalDevice>
 #include <QDataStream>
 #include <btservice_proto/NetworkInfo.pb.h>
 #include <btservice_proto/PhoneResponse.pb.h>
 #include <btservice_proto/SocketInfo.pb.h>
-#include <google/protobuf/util/delimited_message_util.h>
 #include "IAndroidBluetoothServer.hpp"
 
 namespace openauto
