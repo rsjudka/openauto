@@ -122,8 +122,8 @@ void AndroidBluetoothServer::writeNetworkInfoMessage(){
     OPENAUTO_LOG(info) << "[AndroidBluetoothServer] Sending Network Packet";
 
     btservice::proto::NetworkInfo networkMessage;
-    networkMessage.set_ssid("SSID");
-    networkMessage.set_psk("PASSKEY");
+    networkMessage.set_ssid("NETGEAR77-5G");
+    networkMessage.set_psk("largewindow122");
 
     foreach(QNetworkInterface netInterface, QNetworkInterface::allInterfaces())
     {
