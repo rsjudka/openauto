@@ -10,11 +10,14 @@ add_executable(btservice
 
 target_include_directories(btservice PRIVATE
         ${CMAKE_SOURCE_DIR}/include
+        ${Protobuf_INCLUDE_DIRS}
         )
 
 target_link_libraries(btservice
+        btservice_proto
         Threads::Threads
         ${Boost_LIBRARIES}
+        ${Protobuf_LIBRARIES}
         openauto
        )
 

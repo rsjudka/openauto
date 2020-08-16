@@ -69,6 +69,13 @@ if(GST_BUILD)
 message(STATUS "${GST_LIBRARIES}")
 endif(GST_BUILD)
 
+add_subdirectory(btservice_proto)
+set(BTSERVICE_PROTO_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${BTSERVICE_PROTO_INCLUDE_DIRS})
+
+
 add_subdirectory(openauto)
 add_subdirectory(btservice)
 add_subdirectory(autoapp)
+add_dependencies(btservice btservice_proto)
+

@@ -1,26 +1,14 @@
-/*
-*  This file is part of openauto project.
-*  Copyright (C) 2018 f1x.studio (Michal Szwaj)
-*
-*  openauto is free software: you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation; either version 3 of the License, or
-*  (at your option) any later version.
-
-*  openauto is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License
-*  along with openauto. If not, see <http://www.gnu.org/licenses/>.
-*/
-
 #pragma once
 
 #include <stdint.h>
 #include <memory>
+#include <sstream>
 #include <QBluetoothServer>
+#include <QDataStream>
+#include <btservice_proto/NetworkInfo.pb.h>
+#include <btservice_proto/PhoneResponse.pb.h>
+#include <btservice_proto/SocketInfo.pb.h>
+#include <google/protobuf/util/delimited_message_util.h>
 #include "IAndroidBluetoothServer.hpp"
 
 namespace openauto
@@ -39,9 +27,30 @@ public:
 
 private slots:
     void onClientConnected();
+    void readSocket();
 
 private:
     std::unique_ptr<QBluetoothServer> rfcommServer_;
+    QBluetoothSocket* socket;
+
+    void writeSocketInfoMessage();
+    void writeNetworkInfoMessage();
+    void stateMachine();
+    bool writeProtoMessage(uint16_t messageType, google::protobuf::Message &message);
+
+    enum CONNECTION_STATUS {
+        IDLE,
+        DEVICE_CONNECTED,
+        SENDING_SOCKETINFO_MESSAGE,
+        SENT_SOCKETINFO_MESSAGE,
+        PHONE_RESP_SOCKETINFO,
+        SENDING_NETWORKINFO_MESSAGE,
+        SENT_NETWORKINFO_MESSAGE,
+        PHONE_RESP_NETWORKINFO,
+        ERROR
+    };
+ 
+    CONNECTION_STATUS handshakeState = IDLE;
 };
 
 }

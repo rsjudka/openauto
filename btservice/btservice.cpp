@@ -27,8 +27,8 @@ int main(int argc, char* argv[])
 {
     QApplication qApplication(argc, argv);
 
-    const QBluetoothAddress address;
-    const uint16_t portNumber = 5000;
+    const QBluetoothAddress address = QBluetoothAddress();
+    const uint16_t portNumber = 22;
 
     btservice::AndroidBluetoothServer androidBluetoothServer;
     if(!androidBluetoothServer.start(address, portNumber))

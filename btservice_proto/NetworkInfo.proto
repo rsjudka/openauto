@@ -1,0 +1,11 @@
+syntax = "proto2";
+package openauto.btservice.proto;
+
+
+message NetworkInfo{
+    required string ssid = 1;
+    required string psk = 2;
+    required string mac_addr = 3;
+    required int32 security_mode = 4;
+    required int32 unknown_2 = 5;
+}
